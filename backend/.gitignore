@@ -27,3 +27,4 @@ test_reports/
 # Emergent
 .emergent/
 emergent.yml
+.gitconfig
