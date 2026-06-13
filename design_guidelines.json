@@ -1,0 +1,152 @@
+{
+  "theme": "dark",
+  "archetype": "Industrial Command Center",
+  "colors": {
+    "background": {
+      "app": "#0A0D14",
+      "sidebar": "#10141D",
+      "card": "#161A25",
+      "cardHover": "#1C212E",
+      "input": "#0D111A",
+      "tooltip": "#1F2937",
+      "wizardChatUser": "#1A1F2E",
+      "wizardChatAi": "#161A25"
+    },
+    "text": {
+      "primary": "#F8FAFC",
+      "secondary": "#94A3B8",
+      "muted": "#64748B",
+      "inverse": "#020617",
+      "accent": "#F97316"
+    },
+    "border": {
+      "default": "#252B3B",
+      "active": "#334155",
+      "accent": "#E8590C",
+      "focus": "#F97316"
+    },
+    "status": {
+      "healthy": "#10B981",
+      "healthyBg": "rgba(16, 185, 129, 0.1)",
+      "warning": "#F59E0B",
+      "warningBg": "rgba(245, 158, 11, 0.1)",
+      "critical": "#EF4444",
+      "criticalBg": "rgba(239, 68, 68, 0.15)",
+      "info": "#3B82F6",
+      "infoBg": "rgba(59, 130, 246, 0.1)"
+    },
+    "brand": {
+      "primary": "#E8590C",
+      "primaryHover": "#F76707",
+      "molten": "#D9480F",
+      "glow": "rgba(232, 89, 12, 0.25)"
+    }
+  },
+  "typography": {
+    "fontFamilies": {
+      "sans": "Chivo, system-ui, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "headingStyles": {
+      "h1": "text-3xl sm:text-4xl font-black tracking-tight text-[#F8FAFC]",
+      "h2": "text-2xl sm:text-3xl font-bold tracking-tight text-[#F8FAFC]",
+      "h3": "text-xl font-bold tracking-tight uppercase text-[#F8FAFC]",
+      "h4": "text-lg font-bold tracking-tight text-[#E2E8F0]",
+      "kpi": "font-mono text-4xl sm:text-5xl font-light tracking-tighter text-[#F8FAFC]"
+    },
+    "bodyStyles": {
+      "base": "text-base font-normal leading-relaxed text-[#94A3B8]",
+      "small": "text-sm font-normal leading-relaxed text-[#64748B]",
+      "mono": "font-mono text-sm tracking-tight text-[#CBD5E1]",
+      "label": "font-mono text-xs uppercase tracking-[0.1em] text-[#64748B]"
+    }
+  },
+  "layout": {
+    "spacing": {
+      "containerPadding": "p-6 lg:p-8",
+      "cardPadding": "p-5",
+      "gridGap": "gap-4 lg:gap-6",
+      "sectionGap": "gap-8 lg:gap-10"
+    },
+    "structure": {
+      "sidebar": "w-64 fixed left-0 top-0 bottom-0 border-r border-[#252B3B] bg-[#10141D] z-50 flex flex-col",
+      "main": "ml-64 min-h-screen bg-[#0A0D14] flex flex-col relative",
+      "commandBar": "h-16 border-b border-[#252B3B] bg-[#10141D]/90 backdrop-blur-md sticky top-0 z-40 px-6 flex items-center justify-between shadow-sm"
+    },
+    "gridPatterns": {
+      "dashboard": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-12 gap-4 lg:gap-6",
+      "equipmentView": "grid grid-cols-1 lg:grid-cols-12 gap-6",
+      "riskMatrix": "grid grid-cols-3 grid-rows-3 gap-1 bg-[#10141D] p-1 border border-[#252B3B]"
+    }
+  },
+  "components": {
+    "card": {
+      "base": "bg-[#161A25] border border-[#252B3B] rounded-none relative overflow-hidden",
+      "header": "px-5 py-4 border-b border-[#252B3B] flex justify-between items-center bg-[#161A25]",
+      "body": "p-5",
+      "effects": "after:absolute after:inset-0 after:shadow-[inset_0_1px_1px_rgba(255,255,255,0.03)] after:pointer-events-none"
+    },
+    "button": {
+      "primary": "bg-[#E8590C] text-white hover:bg-[#F76707] transition-colors rounded-none font-sans font-semibold text-sm px-4 py-2 border border-transparent flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(232,89,12,0.2)]",
+      "secondary": "bg-[#1A1F2E] text-[#E2E8F0] hover:bg-[#252B3B] border border-[#334155] transition-colors rounded-none font-sans text-sm px-4 py-2 flex items-center justify-center gap-2 cursor-pointer",
+      "ghost": "bg-transparent text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#1C212E] transition-colors rounded-none px-3 py-2 text-sm cursor-pointer",
+      "danger": "bg-red-500/10 text-red-400 border border-red-500/50 hover:bg-red-500/20 transition-colors rounded-none px-4 py-2 text-sm cursor-pointer"
+    },
+    "badge": {
+      "healthy": "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2.5 py-0.5 text-xs font-mono uppercase tracking-wider",
+      "warning": "bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-0.5 text-xs font-mono uppercase tracking-wider",
+      "critical": "bg-red-500/10 text-red-400 border border-red-500/30 px-2.5 py-0.5 text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 before:content-[''] before:block before:w-1.5 before:h-1.5 before:rounded-full before:bg-red-400 before:animate-pulse",
+      "info": "bg-blue-500/10 text-blue-400 border border-blue-500/30 px-2.5 py-0.5 text-xs font-mono uppercase tracking-wider"
+    },
+    "input": {
+      "base": "bg-[#0D111A] border border-[#334155] text-[#F8FAFC] rounded-none focus:border-[#E8590C] focus:ring-1 focus:ring-[#E8590C] px-3 py-2 w-full font-mono text-sm placeholder-[#475569] outline-none transition-all"
+    },
+    "charts": {
+      "tooltip": "bg-[#10141D] border border-[#334155] p-3 text-sm font-mono shadow-xl",
+      "grid": "stroke-[#1E293B] stroke-[1]",
+      "line": "stroke-[2]"
+    },
+    "backgrounds": {
+      "blueprint": "bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:32px_32px]"
+    }
+  },
+  "media": {
+    "image_urls": {
+      "background_texture": {
+        "url": "https://images.unsplash.com/photo-1720036236632-fdb6211cf317?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHw0fHxpbmR1c3RyaWFsJTIwc3RlZWwlMjBwbGFudCUyMG1hY2hpbmVyeSUyMGRhcmt8ZW58MHx8fHwxNzgxMjY2MzY5fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Dark industrial warehouse background, to be used with high opacity dark overlays for auth/login screens or subtle section backgrounds."
+      },
+      "factory_interior": {
+        "url": "https://images.unsplash.com/photo-1496247749665-49cf5b1022e9?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHwxfHxpbmR1c3RyaWFsJTIwc3RlZWwlMjBwbGFudCUyMG1hY2hpbmVyeSUyMGRhcmt8ZW58MHx8fHwxNzgxMjY2MzY5fDA&ixlib=rb-4.1.0&q=85",
+        "description": "Industrial setting with stacked metal and heavy machinery, good for equipment placeholder images or header banners."
+      }
+    }
+  },
+  "motion": {
+    "transitions": {
+      "default": "transition-all duration-200 ease-in-out",
+      "fast": "transition-all duration-100 ease-in",
+      "slow": "transition-all duration-500 ease-out"
+    },
+    "animations": {
+      "pulseDot": "animate-pulse (for critical status dots and live feed indicators)",
+      "slideIn": "animate-in slide-in-from-right-4 duration-300 (for alerts and toasts)"
+    }
+  },
+  "instructions_to_main_agent": [
+    "INSTALLATION: Ensure 'lucide-react' is installed for icons. Use stroke-width=1.5 for a sharp, technical look.",
+    "GLOBAL STYLES: Add the 'Chivo' (sans) and 'JetBrains Mono' (mono) fonts via Google Fonts in index.html.",
+    "LAYOUT ARCHITECTURE: Use the sidebar + command bar structure. The main content area must have the 'blueprint' background utility class applied to establish the industrial theme.",
+    "UI COMPONENT RULES: Do NOT use rounded corners on primary cards or buttons. The UI must feel rigid, sharp, and industrial (rounded-none).",
+    "TYPOGRAPHY RULES: Use 'font-mono' for all data values, metrics, KPI numbers, timestamps, and sensor readings. Use 'font-sans' for descriptive text, conversational AI responses, and navigation.",
+    "DASHBOARD: Build a high-density grid. Use sparklines (via Recharts or similar) inside KPI cards to show trends over time.",
+    "EQUIPMENT HEALTH: Implement a split layout. The left pane should show real-time sensor charts (vibration, temp, pressure) using Recharts. The right pane should house the AI Maintenance Wizard.",
+    "AI WIZARD: Build a chat interface. User messages align right with a secondary background. AI messages align left with border-l-2 border-[#E8590C]. Include a toggle for model selection (Claude 4.5 vs GPT-5.2).",
+    "ROOT CAUSE PANEL: Include evidence chips (small mono badges) that look clickable and link to sensor logs.",
+    "RISK MATRIX: Create a 3x3 grid visualization showing Severity vs Urgency, placing anomalies as dots on the matrix.",
+    "TESTING: Every button, input, navigation link, card, and interactive element MUST have a 'data-testid' attribute (e.g., 'data-testid=\"nav-dashboard\"', 'data-testid=\"kpi-card-vibration\"').",
+    "NO MOCKING EXCEPT DATA: The UI interactions (tabs, modals, chat flow) must work. You can mock the initial JSON data for the steel-plant assets, but the UI must be fully functional.",
+    "ALERTS FEED: Implement real-time toasts and a dedicated alerts feed panel with severity-based filtering.",
+    "COLOR SEMANTICS: Strictly adhere to the provided status colors. Red is ONLY for critical alerts. Orange/Amber is for warnings. Emerald is for healthy states."
+  ]
+}

@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environments
+venv/
+backend/venv/
+
+# Environment files
+.env
+backend/.env
+frontend/.env
+
+# Node modules
+node_modules/
+frontend/node_modules/
+
+# VS Code
+.vscode/
+
+# Test output
+test_reports/
+
+# Logs
+*.log
+
+# Emergent
+.emergent/
+emergent.yml

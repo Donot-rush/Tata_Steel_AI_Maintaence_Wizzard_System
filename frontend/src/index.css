@@ -1,0 +1,322 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* New Tata Steel AI Platform palette */
+  --bg-app: #060B18;
+  --bg-side: #0B1224;
+  --bg-card: #0F172A;
+  --bg-card-2: #131C33;
+  --bg-input: #0B1224;
+  --border-d: #1E293B;
+  --border-a: #334155;
+
+  --t-pri: #F1F5F9;
+  --t-sec: #94A3B8;
+  --t-mut: #64748B;
+
+  /* Vibrant gradient accents (matching reference UI) */
+  --acc-blue: #3B82F6;
+  --acc-purple: #8B5CF6;
+  --acc-cyan: #22D3EE;
+  --acc-teal: #14B8A6;
+  --acc-amber: #F59E0B;
+  --acc-orange: #F97316;
+  --acc-red: #EF4444;
+  --acc-green: #10B981;
+
+  --grad-primary: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+  --grad-cyan: linear-gradient(135deg, #22D3EE 0%, #3B82F6 100%);
+  --grad-warm: linear-gradient(135deg, #F59E0B 0%, #F97316 100%);
+  --grad-success: linear-gradient(135deg, #10B981 0%, #14B8A6 100%);
+  --grad-danger: linear-gradient(135deg, #EF4444 0%, #F97316 100%);
+
+  --tata-blue: #486AAA;
+  --tata-red: #DA291C;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  font-family: 'Chivo', system-ui, sans-serif;
+  background: var(--bg-app);
+  color: var(--t-pri);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+.font-sans { font-family: 'Chivo', system-ui, sans-serif; }
+
+/* TATA watermark in background */
+.tata-watermark::before {
+  content: 'TATA';
+  position: absolute;
+  bottom: 10%; right: 5%;
+  font-family: 'Chivo', sans-serif;
+  font-weight: 900;
+  font-size: 240px;
+  letter-spacing: -8px;
+  color: rgba(72, 106, 170, 0.03);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.blueprint-bg {
+  background-image:
+    radial-gradient(ellipse 80% 60% at 30% 0%, rgba(59, 130, 246, 0.08), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 20%, rgba(139, 92, 246, 0.06), transparent 60%);
+}
+
+.scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 4px; }
+.scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #334155; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+
+.pulse-dot {
+  width: 8px; height: 8px; border-radius: 9999px;
+  box-shadow: 0 0 0 0 currentColor;
+  animation: pulseRing 1.6s cubic-bezier(.4,0,.6,1) infinite;
+}
+@keyframes pulseRing {
+  0% { box-shadow: 0 0 0 0 currentColor; opacity: .8; }
+  70% { box-shadow: 0 0 0 8px transparent; opacity: 0; }
+  100% { box-shadow: 0 0 0 0 transparent; opacity: 0; }
+}
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 10px 18px; font-weight: 600; font-size: 13px;
+  border: 1px solid transparent; cursor: pointer; transition: all .15s ease;
+  letter-spacing: 0.01em; border-radius: 10px;
+}
+.btn-primary {
+  background: var(--grad-primary); color: #fff;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+}
+.btn-primary:hover { filter: brightness(1.1); box-shadow: 0 6px 28px rgba(139, 92, 246, 0.5); }
+.btn-ghost { background: transparent; color: var(--t-sec); }
+.btn-ghost:hover { color: var(--t-pri); background: rgba(255,255,255,0.04); }
+.btn-secondary {
+  background: rgba(30,41,59,0.6); color: #E2E8F0; border-color: var(--border-a);
+  backdrop-filter: blur(8px);
+}
+.btn-secondary:hover { background: rgba(51,65,85,0.6); }
+.btn-danger { background: var(--grad-danger); color: #fff; }
+.btn-success { background: var(--grad-success); color: #fff; }
+
+/* Distinctive card shape — diagonal notch on top-right corner */
+.card {
+  background: linear-gradient(180deg, rgba(15,23,42,0.95), rgba(15,23,42,0.70));
+  border: 1px solid var(--border-d);
+  border-radius: 14px;
+  position: relative; overflow: hidden;
+  backdrop-filter: blur(8px);
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
+}
+.card-flat { clip-path: none; }
+.card-glow-blue { box-shadow: 0 0 32px rgba(59, 130, 246, 0.12); }
+.card-glow-purple { box-shadow: 0 0 32px rgba(139, 92, 246, 0.12); }
+.card-glow-amber { box-shadow: 0 0 32px rgba(245, 158, 11, 0.12); }
+.card-glow-teal { box-shadow: 0 0 32px rgba(20, 184, 166, 0.12); }
+.card-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border-d);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-body { padding: 20px; }
+
+/* gradient top bar for stat cards — now an angled corner accent */
+.stat-card { position: relative; }
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0;
+  width: 70%; height: 3px;
+  background: var(--grad-primary);
+  border-top-left-radius: 14px;
+}
+.stat-card::after {
+  content: ''; position: absolute; top: 0; right: 0;
+  width: 22px; height: 22px;
+  background: linear-gradient(135deg, transparent 50%, var(--acc-cyan) 50% 56%, transparent 56%);
+  opacity: 0.7;
+}
+.stat-card.acc-cyan::before { background: var(--grad-cyan); }
+.stat-card.acc-warm::before { background: var(--grad-warm); }
+.stat-card.acc-success::before { background: var(--grad-success); }
+.stat-card.acc-danger::before { background: var(--grad-danger); }
+.stat-card.acc-purple::before { background: var(--grad-primary); }
+
+/* Signature corner badge on the main area */
+.signature-badge {
+  position: fixed; top: 14px; right: 14px; z-index: 30;
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 4px;
+  background: rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(34, 211, 238, 0.35);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: 0.18em;
+  color: var(--acc-cyan); text-transform: uppercase;
+  backdrop-filter: blur(8px);
+}
+
+/* Custom Tata logo block — angular geometric */
+.tata-logo {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #0B1224 0%, #1E40AF 100%);
+  border: 1px solid rgba(96,165,250,0.5);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Chivo', sans-serif; font-weight: 900;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35),
+              inset 0 1px 0 rgba(255,255,255,0.08);
+  clip-path: polygon(8% 0, 100% 0, 100% 92%, 92% 100%, 0 100%, 0 8%);
+  flex-shrink: 0;
+  position: relative;
+}
+.tata-logo .inner {
+  background: var(--tata-red); color: #fff;
+  padding: 2px 5px;
+  font-size: 9.5px; letter-spacing: 0.05em; font-weight: 800;
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 80% 100%, 0 100%);
+}
+
+.label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--t-mut);
+}
+
+.input {
+  background: rgba(11,18,36,0.8); border: 1px solid var(--border-d);
+  color: var(--t-pri); padding: 11px 14px; border-radius: 10px;
+  font-family: 'Chivo', sans-serif; font-size: 14px; width: 100%;
+  outline: none; transition: all .15s ease;
+}
+.input:focus {
+  border-color: var(--acc-blue);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+.input::placeholder { color: #475569; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; font-size: 10.5px; font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase; letter-spacing: 0.08em; border: 1px solid;
+  border-radius: 6px; font-weight: 600;
+}
+.badge-healthy  { background: rgba(16,185,129,.10); color: #34D399; border-color: rgba(16,185,129,.35); }
+.badge-warning  { background: rgba(245,158,11,.10); color: #FBBF24; border-color: rgba(245,158,11,.40); }
+.badge-critical {
+  background: rgba(239,68,68,.10); color: #F87171;
+  border-color: rgba(239,68,68,.5);
+  box-shadow: 0 0 14px rgba(239,68,68,.3);
+}
+.badge-info     { background: rgba(59,130,246,.10); color: #60A5FA; border-color: rgba(59,130,246,.35); }
+.badge-purple   { background: rgba(139,92,246,.12); color: #A78BFA; border-color: rgba(139,92,246,.4); }
+
+.markdown { color: #E2E8F0; line-height: 1.6; font-size: 14px; }
+.markdown p { margin: 0.5em 0; }
+.markdown h1, .markdown h2, .markdown h3, .markdown h4 {
+  color: var(--t-pri); margin: 0.8em 0 0.3em; font-weight: 700;
+}
+.markdown h1 { font-size: 1.25em; }
+.markdown h2 { font-size: 1.15em; }
+.markdown h3 { font-size: 1.05em; }
+.markdown ul, .markdown ol { margin: 0.5em 0; padding-left: 1.4em; }
+.markdown li { margin: 0.2em 0; }
+.markdown code {
+  background: #0B1224; border: 1px solid var(--border-d); border-radius: 4px;
+  padding: 1px 6px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px;
+  color: #93C5FD;
+}
+.markdown pre {
+  background: #0B1224; border: 1px solid var(--border-d); border-radius: 8px;
+  padding: 12px; overflow-x: auto; font-size: 12.5px;
+}
+.markdown strong { color: var(--t-pri); }
+.markdown a { color: var(--acc-blue); text-decoration: underline; }
+.markdown blockquote {
+  border-left: 2px solid var(--acc-purple); padding-left: 12px;
+  color: var(--t-sec); margin: 0.6em 0;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 18px; margin: 1px 10px;
+  color: var(--t-sec); font-size: 13.5px;
+  cursor: pointer; transition: all .15s ease; border-radius: 10px;
+  font-weight: 500;
+}
+.nav-item:hover { color: var(--t-pri); background: rgba(59,130,246,0.06); }
+.nav-item.active {
+  color: #fff; background: var(--grad-primary);
+  box-shadow: 0 4px 18px rgba(99, 102, 241, 0.35);
+}
+
+.divider { height: 1px; background: var(--border-d); }
+.text-pri { color: var(--t-pri); }
+.text-sec { color: var(--t-sec); }
+.text-mut { color: var(--t-mut); }
+.text-healthy { color: var(--acc-green); }
+.text-warning { color: var(--acc-amber); }
+.text-critical { color: var(--acc-red); }
+.text-info { color: var(--acc-blue); }
+.text-purple { color: var(--acc-purple); }
+.text-cyan { color: var(--acc-cyan); }
+
+.bg-card { background: var(--bg-card); }
+.border-d { border-color: var(--border-d); }
+
+@keyframes slideInRight {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.slide-in { animation: slideInRight .25s ease-out; }
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.blink { animation: blink 1.4s ease-in-out infinite; }
+
+@keyframes recPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+}
+.recording { animation: recPulse 1.4s ease-in-out infinite; }
+
+/* Tata logo */
+.tata-logo-OLD-IGNORE { display: none; }
+
+.fab {
+  position: fixed; bottom: 26px; right: 26px;
+  width: 54px; height: 54px; border-radius: 50%;
+  background: var(--grad-primary);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 36px rgba(99, 102, 241, 0.55);
+  cursor: pointer; transition: transform .15s ease;
+  z-index: 60;
+}
+.fab:hover { transform: scale(1.08); }
+
+/* Bars for analytics tiny charts */
+.bar-tiny { display: flex; align-items: flex-end; gap: 3px; height: 28px; }
+.bar-tiny > div {
+  flex: 1; background: linear-gradient(180deg, #3B82F6, #1E40AF);
+  border-radius: 1px; min-height: 3px;
+  transition: opacity .2s ease;
+}
+
+.gantt-cell {
+  padding: 8px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  border: 1px solid;
+}
+.gantt-critical {
+  background: rgba(239,68,68,0.15); color: #FCA5A5;
+  border-color: rgba(239,68,68,0.5);
+  box-shadow: 0 0 14px rgba(239,68,68,0.3);
+}
+.gantt-warning { background: rgba(245,158,11,0.15); color: #FCD34D; border-color: rgba(245,158,11,0.5); }
+.gantt-info    { background: rgba(59,130,246,0.15); color: #93C5FD; border-color: rgba(59,130,246,0.5); }
