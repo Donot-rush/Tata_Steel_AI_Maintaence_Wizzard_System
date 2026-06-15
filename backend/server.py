@@ -61,7 +61,11 @@ class ChatStartReq(BaseModel):
 class ChatSendReq(BaseModel):
     session_id: str
     message: str
-    model: Literal["claude-sonnet-4-5-20250929", "gpt-5.2"] = "claude-sonnet-4-5-20250929"
+    model: Literal[
+        "forgeops-sentinel",
+        "claude-sonnet-4-5-20250929",
+        "gpt-5.2",
+    ] = "forgeops-sentinel"
     asset_id: Optional[str] = None
 
 
@@ -428,9 +432,128 @@ async def get_session(sid: str):
 
 
 def _provider_for(model: str):
-    if model.startswith("claude"):
-        return "anthropic"
-    return "openai"
+    if model in {"forgeops-sentinel", "claude-sonnet-4-5-20250929"}:
+        return "gemini"
+    return "groq"
+
+
+def _provider_returned_error_text(text: str) -> bool:
+    lowered = (text or "").lower()
+    return (
+        "model error" in lowered
+        or "503 unavailable" in lowered
+        or "status': 'unavailable'" in lowered
+        or '"status": "unavailable"' in lowered
+        or "currently experiencing high demand" in lowered
+    )
+
+
+async def _local_sentinel_response(message: str, asset_id: Optional[str]) -> str:
+    """Deterministic fallback when an external AI provider is unavailable."""
+    if asset_id:
+        asset = await db.assets.find_one({"id": asset_id}, {"_id": 0})
+        if not asset:
+            return (
+                "### FORGEOPS Sentinel fallback\n\n"
+                "I could not find that asset in the plant registry. Please select a valid asset "
+                "and retry. (source: asset registry)"
+            )
+        alerts = await db.alerts.find(
+            {"asset_id": asset_id, "acknowledged": False}, {"_id": 0}
+        ).sort("created_at", -1).to_list(5)
+        logs = await db.logbook.find({"asset_id": asset_id}, {"_id": 0}) \
+            .sort("created_at", -1).to_list(3)
+        sensors = _live_sensor_snapshot(asset_id)
+        latest = {k: (v[-1]["v"] if v else None) for k, v in sensors.items()}
+
+        actions = []
+        if asset["status"] == "critical":
+            actions.append(
+                "- [IMMEDIATE] Plan inspection in the next safe stoppage window. "
+                f"(asset health {asset['health']}/100, RUL {asset['rul_days']} days)"
+            )
+            actions.append(
+                "- [IMMEDIATE] Review active alerts and isolate the likely failure component. "
+                f"(open alerts: {len(alerts)})"
+            )
+        elif asset["status"] == "warning":
+            actions.append(
+                "- [SHORT-TERM] Schedule condition inspection within the next planned maintenance window. "
+                f"(asset health {asset['health']}/100, RUL {asset['rul_days']} days)"
+            )
+        else:
+            actions.append(
+                "- [LONG-TERM] Continue normal monitoring and keep the current PM cadence. "
+                f"(asset status: {asset['status']})"
+            )
+        actions.append(
+            "- [LONG-TERM] Feed the latest maintenance outcome back into the reliability record. "
+            "(source: maintenance logbook)"
+        )
+
+        alert_lines = [
+            f"- {a['severity'].upper()}: {a['title']} ({a.get('asset_name', asset['name'])})"
+            for a in alerts
+        ] or ["- No open alerts for this asset. (source: alert register)"]
+        log_lines = [
+            f"- {l['action']} by {l.get('performed_by', 'maintenance team')} ({l.get('duration_min', 0)} min)"
+            for l in logs
+        ] or ["- No recent maintenance log entries. (source: logbook)"]
+
+        return (
+            "### FORGEOPS Sentinel fallback response\n\n"
+            "The cloud model is temporarily unavailable, so I generated this from the local "
+            "plant data already in the system.\n\n"
+            f"**Asset:** {asset['name']} ({asset['code']})\n\n"
+            f"**Current condition:** {asset['status'].upper()} with health "
+            f"{asset['health']}/100 and RUL {asset['rul_days']} days. "
+            "(source: asset registry)\n\n"
+            f"**Latest sensor snapshot:** vibration {latest.get('vibration')}, "
+            f"temperature {latest.get('temperature')}, pressure {latest.get('pressure')}, "
+            f"current {latest.get('current')}. (source: live sensor simulator)\n\n"
+            "**Active evidence:**\n" + "\n".join(alert_lines) + "\n\n"
+            "**Recent maintenance context:**\n" + "\n".join(log_lines) + "\n\n"
+            "**Recommended actions:**\n" + "\n".join(actions) + "\n\n"
+            "**Why this matters:** This keeps the operator moving with local evidence while "
+            "the external AI service recovers."
+        )
+
+    assets = await db.assets.find({}, {"_id": 0}).to_list(100)
+    alerts = await db.alerts.find({"acknowledged": False}, {"_id": 0}) \
+        .sort("created_at", -1).to_list(100)
+    ranked = sorted(
+        assets,
+        key=lambda a: (
+            {"critical": 0, "warning": 1, "healthy": 2}.get(a["status"], 3),
+            a["rul_days"],
+            a["health"],
+        ),
+    )[:6]
+    action_lines = []
+    for a in ranked:
+        priority = "IMMEDIATE" if a["status"] == "critical" else "SHORT-TERM"
+        action_lines.append(
+            f"- [{priority}] {a['name']} ({a['code']}): health {a['health']}/100, "
+            f"RUL {a['rul_days']} days. (source: asset registry)"
+        )
+
+    return (
+        "### FORGEOPS Sentinel fallback response\n\n"
+        "The cloud model is temporarily unavailable, so I generated this plant-wide "
+        "plan from local fleet, alert and RUL data.\n\n"
+        f"**Open alerts:** {len(alerts)}. **Assets reviewed:** {len(assets)}. "
+        "(source: local database)\n\n"
+        "**Priority maintenance queue:**\n" + "\n".join(action_lines) + "\n\n"
+        "**Next steps:**\n"
+        "- [IMMEDIATE] Dispatch checks for critical assets with RUL under 15 days. "
+        "(source: RUL ranking)\n"
+        "- [SHORT-TERM] Confirm spare availability before assigning downtime windows. "
+        "(source: inventory workflow)\n"
+        "- [LONG-TERM] Update logbook after work completion so future recommendations improve. "
+        "(source: logbook workflow)\n\n"
+        "**Why this matters:** The team still gets an actionable plan even when the "
+        "external model endpoint is busy."
+    )
 
 
 @api.post("/wizard/chat/stream")
@@ -489,19 +612,22 @@ async def chat_stream(body: ChatSendReq):
 
     async def gen():
         try:
-            if body.model.startswith("claude"):
+            if _provider_for(body.model) == "gemini":
                 text = await asyncio.to_thread(call_gemini)
             else:
                 text = await asyncio.to_thread(call_groq)
+
+            if _provider_returned_error_text(text):
+                text = await _local_sentinel_response(body.message, asset_id)
 
             collected["text"] = text
             yield f"data: {json.dumps({'type': 'delta', 'content': text})}\n\n"
 
         except Exception as e:
             log.exception("LLM error")
-            err = f"\n\n_⚠️ Model error: {str(e)[:300]}_"
-            collected["text"] = err
-            yield f"data: {json.dumps({'type': 'delta', 'content': err})}\n\n"
+            fallback = await _local_sentinel_response(body.message, asset_id)
+            collected["text"] = fallback
+            yield f"data: {json.dumps({'type': 'delta', 'content': fallback})}\n\n"
 
         finally:
             asst_msg = {

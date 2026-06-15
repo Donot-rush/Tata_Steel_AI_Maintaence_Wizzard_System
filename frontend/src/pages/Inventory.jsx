@@ -1,17 +1,16 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { getInventory, purchasePart } from "../lib/api";
-import { Card, Spinner } from "../components/UI";
+import { Spinner } from "../components/UI";
 import { useRole } from "../lib/RoleContext";
-import { Search, Package, ShieldAlert, AlertTriangle, DollarSign, PlusCircle, Filter, Lock } from "lucide-react";
+import { AlertTriangle, DollarSign, Filter, Lock, Package, PlusCircle, Search, ShieldAlert } from "lucide-react";
 
-const CATEGORIES = ["All Asset Types", "Centrifugal Pump", "Turbo Blower",
-  "AC Motor (2000kW)", "Helical Gearbox", "Steam Turbine"];
+const CATEGORIES = ["All Asset Types", "Centrifugal Pump", "Turbo Blower", "AC Motor (2000kW)", "Helical Gearbox", "Steam Turbine"];
 const STOCK_FILTERS = ["All", "Out of Stock", "Low Stock"];
 
 function StockBadge({ level, count }) {
-  if (level === "out") return <span className="badge badge-critical">OUT OF STOCK</span>;
-  if (level === "low") return <span className="badge badge-warning">LOW STOCK ({count})</span>;
-  return <span className="badge badge-healthy">IN STOCK ({count})</span>;
+  if (level === "out") return <span className="badge badge-critical">Out</span>;
+  if (level === "low") return <span className="badge badge-warning">Low ({count})</span>;
+  return <span className="badge badge-healthy">In ({count})</span>;
 }
 
 export default function Inventory() {
@@ -25,7 +24,10 @@ export default function Inventory() {
   const canExpedite = can("expedite");
 
   const load = async () => setData(await getInventory());
-  useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    load();
+  }, []);
 
   const filtered = useMemo(() => {
     if (!data) return [];
@@ -43,7 +45,8 @@ export default function Inventory() {
   const purchase = async (id) => {
     try {
       await purchasePart(id);
-      setMsg(""); load();
+      setMsg("");
+      load();
     } catch (e) {
       const detail = e?.response?.data?.detail || "Action failed";
       setMsg(detail);
@@ -52,192 +55,140 @@ export default function Inventory() {
   };
 
   return (
-    <div className="p-8 max-w-[1600px] mx-auto relative z-10" data-testid="inventory-page">
-      <div className="mb-6">
-        <div className="label mb-1">INDUSTRIAL SPARES & RISK OPTIMIZER</div>
-        <h1 className="text-4xl font-black tracking-tight" style={{
-          background: "linear-gradient(90deg, #60A5FA, #A78BFA)",
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-        }}>Spare Parts & Procurement</h1>
-        <p className="text-sec text-sm mt-1">AI-driven logistics monitoring, out-of-stock risk valuation, and instant procurement dispatch.</p>
+    <div className="relative z-10 mx-auto max-w-[1760px] p-6 lg:p-8" data-testid="inventory-page">
+      <div className="mb-5 rounded-md border border-slate-700/70 bg-[#08111f] p-5">
+        <div className="label mb-2 flex items-center gap-2 text-cyan">
+          <Package size={14} /> Spares Control Ledger
+        </div>
+        <h1 className="text-3xl font-black text-pri md:text-4xl">Inventory Risk Dispatch</h1>
+        <p className="mt-2 text-sm text-sec">
+          Live spares availability, shortage exposure, lead-time risk and role-gated procurement.
+        </p>
         {msg && (
-          <div className="mt-3 inline-flex items-center gap-2 bg-red-500/10 border border-red-500/40 px-3 py-1.5 rounded-md text-critical text-sm" data-testid="role-error-toast">
+          <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-red-500/40 bg-red-500/10 px-3 py-1.5 text-sm text-critical" data-testid="role-error-toast">
             <Lock size={13} /> {msg}
           </div>
         )}
       </div>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="card stat-card acc-purple p-5" data-testid="kpi-cataloged">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{background: "rgba(59,130,246,0.15)"}}>
-              <Package size={18} className="text-info" />
+      <div className="mb-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {[
+          ["Cataloged Spares", data.kpis.cataloged, Package, "text-info"],
+          ["Out of Stock", data.kpis.out_of_stock, ShieldAlert, "text-critical"],
+          ["Low Stock", data.kpis.low_stock, AlertTriangle, "text-warning"],
+          ["On-Hand Value", `Rs ${data.kpis.on_hand_value.toLocaleString()}`, DollarSign, "text-healthy"],
+        ].map(([label, value, Icon, tone]) => (
+          <div key={label} className="rounded-md border border-slate-700/70 bg-[#101827] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <span className="label">{label}</span>
+              <Icon size={18} className={tone} />
             </div>
-            <div className="label">Cataloged Spares</div>
+            <div className={`mt-3 font-mono text-3xl font-bold ${tone}`}>{value}</div>
           </div>
-          <div className="font-mono text-4xl font-light text-pri">{data.kpis.cataloged}</div>
-        </div>
-        <div className="card stat-card acc-danger p-5" data-testid="kpi-oos">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{background: "rgba(239,68,68,0.15)"}}>
-              <ShieldAlert size={18} className="text-critical" />
-            </div>
-            <div className="label">Out Of Stock</div>
-          </div>
-          <div className="font-mono text-4xl font-light text-critical">{data.kpis.out_of_stock}</div>
-        </div>
-        <div className="card stat-card acc-warm p-5" data-testid="kpi-low">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{background: "rgba(245,158,11,0.15)"}}>
-              <AlertTriangle size={18} className="text-warning" />
-            </div>
-            <div className="label">Low Stock</div>
-          </div>
-          <div className="font-mono text-4xl font-light text-warning">{data.kpis.low_stock}</div>
-        </div>
-        <div className="card stat-card acc-success p-5" data-testid="kpi-value">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{background: "rgba(16,185,129,0.15)"}}>
-              <DollarSign size={18} className="text-healthy" />
-            </div>
-            <div className="label">On-Hand Value</div>
-          </div>
-          <div className="font-mono text-4xl font-light text-healthy">₹{data.kpis.on_hand_value.toLocaleString()}</div>
-        </div>
+        ))}
       </div>
 
-      {/* Risk alert */}
       {data.risk_rows.length > 0 && (
-        <div className="card mb-6 border-red-500/40" style={{ boxShadow: "0 0 36px rgba(239, 68, 68, 0.15)" }} data-testid="risk-alert">
-          <div className="card-body">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-lg bg-red-500/20 border border-red-500/40 flex items-center justify-center">
-                <ShieldAlert size={20} className="text-critical" />
+        <section className="mb-5 rounded-md border border-red-500/35 bg-red-500/10 p-4" data-testid="risk-alert">
+          <div className="mb-4 flex items-start gap-3">
+            <ShieldAlert size={24} className="mt-1 text-critical" />
+            <div>
+              <div className="label text-critical">Critical Shortage Exposure</div>
+              <div className="mt-1 text-2xl font-black text-pri">
+                Production downtime risk: <span className="text-critical">Rs {data.kpis.risk_exposure.toLocaleString()}</span>
               </div>
-              <div>
-                <div className="font-mono text-[10px] tracking-[0.14em] uppercase text-critical">CRITICAL SPARES SHORTAGE RISK ALERT</div>
-                <div className="text-2xl font-bold mt-1">
-                  Production Downtime Risk Exposure: <span className="text-critical">₹{data.kpis.risk_exposure.toLocaleString()}</span>
-                </div>
-                <div className="text-sec text-sm mt-1">
-                  There are <span className="text-pri font-bold">{data.kpis.degraded_assets}</span> degraded or critical plant assets missing matching spare parts. Production losses accumulate daily during parts lead-time.
-                </div>
-              </div>
-            </div>
-            <div className="label mb-2">ACTIVE EXPOSURE BREAKDOWN (LOSS COST = PART COST + LEAD TIME × ₹10,000/DAY)</div>
-            <div className="space-y-2">
-              <div className="grid grid-cols-[2fr_80px_2fr_100px_120px_100px] gap-3 label py-2 border-b border-d">
-                <span>Degraded Asset</span><span>Health</span><span>Missing Spare</span><span>Lead Time</span><span>Risk Valuation</span><span className="text-right">Action</span>
-              </div>
-              {data.risk_rows.map((r) => (
-                <div key={r.asset_id} className="grid grid-cols-[2fr_80px_2fr_100px_120px_100px] gap-3 items-center py-2">
-                  <div>
-                    <div className="text-pri font-semibold">{r.asset_name}</div>
-                    <div className="font-mono text-[10px] text-mut">{r.location} · ID: {r.asset_id}</div>
-                  </div>
-                  <div className="badge badge-critical w-fit">{r.health}%</div>
-                  <div>
-                    <div className="text-pri text-sm">{r.spare_name}</div>
-                    <div className="font-mono text-[10px] text-mut">{r.part_no} · Cost: ₹{r.spare_cost.toLocaleString()}</div>
-                  </div>
-                  <div className="font-mono text-warning">{r.lead_days} Days</div>
-                  <div className="font-mono text-critical font-semibold">₹{r.risk_inr.toLocaleString()}</div>
-                  <div className="text-right">
-                    <button
-                      className={`btn !px-3 !py-1.5 !text-xs ${canExpedite ? "btn-danger" : "btn-secondary opacity-60"}`}
-                      onClick={() => canExpedite ? purchase("sp-bld-001") : setMsg("Admin role required to expedite purchase orders")}
-                      data-testid={`expedite-${r.asset_id}`}
-                      title={canExpedite ? "Expedite PO" : "Admin only"}
-                    >
-                      {canExpedite ? "Expedite PO" : <><Lock size={11} /> Admin</>}
-                    </button>
-                  </div>
-                </div>
-              ))}
+              <p className="mt-1 text-sm text-sec">
+                {data.kpis.degraded_assets} degraded or critical plant assets are missing matching spare parts.
+              </p>
             </div>
           </div>
-        </div>
+          <div className="space-y-2">
+            {data.risk_rows.map((r) => (
+              <div key={r.asset_id} className="grid gap-3 rounded border border-red-500/25 bg-[#08111f] p-3 md:grid-cols-[1.5fr_70px_1.5fr_90px_120px_110px]">
+                <div>
+                  <div className="font-semibold text-pri">{r.asset_name}</div>
+                  <div className="font-mono text-[10px] uppercase tracking-wider text-mut">{r.location} - {r.asset_id}</div>
+                </div>
+                <div className="badge badge-critical w-fit">{r.health}%</div>
+                <div>
+                  <div className="text-sm text-pri">{r.spare_name}</div>
+                  <div className="font-mono text-[10px] text-mut">{r.part_no} - Rs {r.spare_cost.toLocaleString()}</div>
+                </div>
+                <div className="font-mono text-warning">{r.lead_days}d</div>
+                <div className="font-mono font-semibold text-critical">Rs {r.risk_inr.toLocaleString()}</div>
+                <button
+                  className={`btn !px-3 !py-1.5 !text-xs ${canExpedite ? "btn-danger" : "btn-secondary opacity-60"}`}
+                  onClick={() => canExpedite ? purchase("sp-bld-001") : setMsg("Admin role required to expedite purchase orders")}
+                  data-testid={`expedite-${r.asset_id}`}
+                >
+                  {canExpedite ? "Expedite PO" : <><Lock size={11} /> Admin</>}
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
 
-      {/* Search + Filters */}
-      <Card className="mb-4">
-        <div className="flex gap-3 flex-wrap items-center">
-          <div className="relative flex-1 min-w-[260px]">
+      <section className="mb-5 rounded-md border border-slate-700/70 bg-[#101827] p-4">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
+          <div className="relative flex-1">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-mut" />
             <input
               data-testid="inv-search"
               className="input pl-9"
-              placeholder="Search spare parts by name or part number..."
+              placeholder="Search spare name or part number..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Filter size={14} className="text-mut" />
-            <span className="label">Filter Stock:</span>
             {STOCK_FILTERS.map((s) => (
               <button
                 key={s}
                 onClick={() => setStock(s)}
                 data-testid={`stock-filter-${s}`}
-                className={`btn !px-3 !py-1.5 !text-xs ${
-                  stock === s
-                    ? (s === "Out of Stock" ? "btn-danger" : s === "Low Stock" ? "bg-amber-500/20 text-amber-300 border border-amber-500/40" : "btn-primary")
-                    : "btn-secondary"
-                }`}
-              >{s}</button>
+                className={`btn !px-3 !py-1.5 !text-xs ${stock === s ? "btn-primary" : "btn-secondary"}`}
+              >
+                {s}
+              </button>
             ))}
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 mt-4">
+        <div className="mt-3 flex flex-wrap gap-2">
           {CATEGORIES.map((c) => (
-            <button
-              key={c}
-              onClick={() => setCat(c)}
-              data-testid={`cat-${c}`}
-              className={`btn !px-3 !py-1.5 !text-xs ${cat === c ? "btn-primary" : "btn-secondary"}`}
-            >{c}</button>
+            <button key={c} onClick={() => setCat(c)} data-testid={`cat-${c}`} className={`btn !px-3 !py-1.5 !text-xs ${cat === c ? "btn-primary" : "btn-secondary"}`}>
+              {c}
+            </button>
           ))}
         </div>
-      </Card>
+      </section>
 
-      {/* Spare parts grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {filtered.map((p) => (
-          <div key={p.id} className="card stat-card acc-purple p-5" data-testid={`spare-${p.part_no}`}>
-            <div className="label text-info">{p.category}</div>
-            <div className="font-bold text-pri mt-1.5 text-[15px] leading-snug">{p.name}</div>
-            <div className="font-mono text-[10px] text-mut mt-1">PART NO: {p.part_no}</div>
-            <div className="divider my-4" />
-            <div className="space-y-2.5">
-              <div className="flex justify-between items-center">
-                <span className="text-sec text-sm">Stock Level:</span>
-                <StockBadge level={p.level} count={p.stock} />
+      <section className="rounded-md border border-slate-700/70 bg-[#101827] p-4">
+        <div className="hidden grid-cols-[1.6fr_1fr_90px_110px_120px_190px] gap-3 border-b border-d px-3 py-2 label md:grid">
+          <span>Spare</span><span>Category</span><span>Stock</span><span>Unit Cost</span><span>Lead Time</span><span>Action</span>
+        </div>
+        <div className="space-y-2">
+          {filtered.map((p) => (
+            <div key={p.id} className="grid gap-3 rounded border border-slate-700 bg-[#08111f] px-3 py-3 md:grid-cols-[1.6fr_1fr_90px_110px_120px_190px]" data-testid={`spare-${p.part_no}`}>
+              <div>
+                <div className="font-semibold text-pri">{p.name}</div>
+                <div className="font-mono text-[10px] uppercase tracking-wider text-mut">{p.part_no}</div>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-sec">Unit Cost:</span>
-                <span className="font-mono text-pri">₹{p.unit_cost.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-sec">Standard Lead Time:</span>
-                <span className="font-mono text-pri">{p.lead_days} Days</span>
-              </div>
+              <div className="text-sm text-sec">{p.category}</div>
+              <StockBadge level={p.level} count={p.stock} />
+              <div className="font-mono text-pri">Rs {p.unit_cost.toLocaleString()}</div>
+              <div className="font-mono text-sec">{p.lead_days} days</div>
+              <button onClick={() => canBuy ? purchase(p.id) : setMsg("Supervisor or Admin role required to place purchase orders")} className={`btn !py-1.5 ${canBuy ? "btn-primary" : "btn-secondary opacity-70"}`} data-testid={`purchase-${p.part_no}`}>
+                {canBuy ? <><PlusCircle size={14} /> Purchase Order</> : <><Lock size={13} /> {role} cannot purchase</>}
+              </button>
             </div>
-            <button
-              onClick={() => canBuy ? purchase(p.id) : setMsg("Supervisor or Admin role required to place purchase orders")}
-              className={`btn w-full mt-4 ${canBuy ? "btn-primary" : "btn-secondary opacity-70"}`}
-              data-testid={`purchase-${p.part_no}`}
-              title={canBuy ? "Place purchase order" : "Insufficient permission"}
-            >
-              {canBuy ? <><PlusCircle size={14} /> 1-Click Purchase Order</> : <><Lock size={13} /> {role} cannot purchase</>}
-            </button>
-          </div>
-        ))}
-        {filtered.length === 0 && (
-          <div className="col-span-full text-sec text-sm text-center py-10">No spare parts match these filters.</div>
-        )}
-      </div>
+          ))}
+          {filtered.length === 0 && (
+            <div className="py-10 text-center text-sm text-sec">No spare parts match these filters.</div>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

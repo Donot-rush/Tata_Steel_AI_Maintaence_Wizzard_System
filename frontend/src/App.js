@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./App.css";
 import Layout from "./components/Layout";
+import LaunchScreen from "./components/LaunchScreen";
 import { RoleProvider } from "./lib/RoleContext";
 import Overview from "./pages/Overview";
 import Equipment from "./pages/Equipment";
@@ -17,9 +18,12 @@ import Credits from "./pages/Credits";
 import { listAlerts } from "./lib/api";
 
 function App() {
+  const [bootMode, setBootMode] = useState("landing");
   const [criticalCount, setCriticalCount] = useState(0);
 
   useEffect(() => {
+    if (bootMode !== "console") return undefined;
+
     const load = async () => {
       try {
         const al = await listAlerts({ severity: "critical", acknowledged: false });
@@ -29,7 +33,16 @@ function App() {
     load();
     const id = setInterval(load, 15000);
     return () => clearInterval(id);
-  }, []);
+  }, [bootMode]);
+
+  const launchConsole = () => {
+    setBootMode("booting");
+    window.setTimeout(() => setBootMode("console"), 1500);
+  };
+
+  if (bootMode !== "console") {
+    return <LaunchScreen mode={bootMode} onLaunch={launchConsole} />;
+  }
 
   return (
     <BrowserRouter>

@@ -1,9 +1,22 @@
-import React, { useEffect, useState, useMemo, useRef } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { listAssets, getAsset, getRecommendations } from "../lib/api";
-import { Card, StatusBadge, Spinner } from "../components/UI";
-import { SensorChart, HealthGauge } from "../components/Charts";
-import { Cpu, MapPin, Factory, Calendar, Zap, ArrowRight, Search, Filter, Radio } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { getAsset, getRecommendations, listAssets } from "../lib/api";
+import { Card, Spinner, StatusBadge } from "../components/UI";
+import { HealthGauge, SensorChart } from "../components/Charts";
+import {
+  ArrowRight,
+  Calendar,
+  Cpu,
+  Factory,
+  Filter,
+  MapPin,
+  Radio,
+  Search,
+  ShieldAlert,
+  SlidersHorizontal,
+  Wrench,
+  Zap,
+} from "lucide-react";
 
 const SECTOR_FILTERS = [
   { id: "all", label: "All" },
@@ -15,66 +28,60 @@ const SECTOR_FILTERS = [
   { id: "Power Plant", label: "Power Plant" },
 ];
 
-function statusLabel(s) {
-  if (s === "healthy") return "OPERATIONAL";
-  if (s === "warning") return "DEGRADED";
-  return "CRITICAL";
+function statusLabel(status) {
+  if (status === "healthy") return "Stable";
+  if (status === "warning") return "Watch";
+  return "Critical";
 }
 
-function healthGradient(h) {
-  // 0 -> red, 50 -> amber, 100 -> green/teal
-  if (h >= 70) return "linear-gradient(90deg, #10B981, #22D3EE)";
-  if (h >= 50) return "linear-gradient(90deg, #F59E0B, #F97316)";
-  return "linear-gradient(90deg, #EF4444, #F97316)";
+function healthTone(health) {
+  if (health >= 70) return "text-healthy";
+  if (health >= 50) return "text-warning";
+  return "text-critical";
 }
 
-function FleetCard({ a }) {
+function statusBorder(status) {
+  if (status === "critical") return "border-red-500/45 bg-red-500/10";
+  if (status === "warning") return "border-amber-500/45 bg-amber-500/10";
+  return "border-emerald-500/35 bg-emerald-500/10";
+}
+
+function FleetRow({ asset }) {
   return (
-    <Link to={`/equipment/${a.id}`} data-testid={`fleet-card-${a.code}`}
-          className="bg-[#0F172A] border border-d rounded-xl p-4 hover:border-blue-500/40 transition relative overflow-hidden">
-      <div className="flex items-start justify-between mb-2">
+    <Link
+      to={`/equipment/${asset.id}`}
+      data-testid={`fleet-card-${asset.code}`}
+      className={`grid gap-3 rounded-md border px-4 py-3 transition hover:translate-x-1 hover:border-cyan-400/60 md:grid-cols-[1.7fr_1fr_90px_110px_90px] ${statusBorder(asset.status)}`}
+    >
+      <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-blue-500/15 flex items-center justify-center">
-            <Cpu size={14} className="text-info" />
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded border border-slate-700 bg-[#08111f]">
+            <Cpu size={14} className="text-cyan" />
+          </span>
+          <div className="min-w-0">
+            <div className="truncate text-sm font-bold text-pri">{asset.name}</div>
+            <div className="font-mono text-[10px] uppercase tracking-wider text-mut">
+              {asset.code} - {asset.category}
+            </div>
           </div>
-          <div className="font-semibold text-pri">{a.name}</div>
         </div>
-        <span className={`badge ${a.status === "healthy" ? "badge-healthy" : a.status === "warning" ? "badge-warning" : "badge-critical"}`}>
-          {statusLabel(a.status)}
+      </div>
+      <div className="truncate text-sm text-sec">{asset.location}</div>
+      <div className={`font-mono text-sm font-bold ${healthTone(asset.health)}`}>
+        {asset.health}.0%
+      </div>
+      <div className="h-2 self-center overflow-hidden rounded-full bg-slate-800">
+        <div
+          className={`h-full rounded-full ${
+            asset.health >= 70 ? "bg-emerald-400" : asset.health >= 50 ? "bg-amber-400" : "bg-red-400"
+          }`}
+          style={{ width: `${asset.health}%` }}
+        />
+      </div>
+      <div className="text-right">
+        <span className={`badge ${asset.status === "healthy" ? "badge-healthy" : asset.status === "warning" ? "badge-warning" : "badge-critical"}`}>
+          {statusLabel(asset.status)}
         </span>
-      </div>
-      <div className="text-xs text-sec mb-4">{a.location} · {a.category}</div>
-
-      <div className="flex items-center justify-between text-xs text-sec">
-        <span>Health Score</span>
-        <span className={`font-mono font-bold ${
-          a.health >= 70 ? "text-healthy" : a.health >= 50 ? "text-warning" : "text-critical"
-        }`}>{a.health}.0%</span>
-      </div>
-      <div className="h-2 bg-[#1E293B] rounded-full mt-1.5 overflow-hidden">
-        <div className="h-full rounded-full transition-all duration-700"
-             style={{ width: `${a.health}%`, background: healthGradient(a.health) }} />
-      </div>
-
-      <div className="grid grid-cols-3 gap-3 mt-4 text-xs">
-        <div>
-          <div className="label">Criticality</div>
-          <div className="text-critical font-semibold mt-1 flex items-center gap-1">
-            <span className="w-1 h-1 rounded-full bg-red-500" /> {a.criticality.toUpperCase()}
-          </div>
-        </div>
-        <div>
-          <div className="label">Risk Level</div>
-          <div className="mt-1">
-            <span className={`badge ${a.status === "healthy" ? "badge-healthy" : a.status === "warning" ? "badge-warning" : "badge-critical"} !text-[9px] !py-0.5`}>
-              {a.status === "critical" ? "CRITICAL" : a.status === "warning" ? "HIGH" : "LOW"}
-            </span>
-          </div>
-        </div>
-        <div>
-          <div className="label">Asset ID</div>
-          <div className="font-mono text-pri mt-1">{a.code}</div>
-        </div>
       </div>
     </Link>
   );
@@ -91,16 +98,19 @@ export default function Equipment() {
   const [liveTick, setLiveTick] = useState(null);
   const wsRef = useRef(null);
 
-  useEffect(() => { listAssets().then(setAssets); }, []);
+  useEffect(() => {
+    listAssets().then(setAssets);
+  }, []);
 
   useEffect(() => {
-    if (!id) return;
-    setDetail(null); setRecs(null); setLiveTick(null);
+    if (!id) return undefined;
+    setDetail(null);
+    setRecs(null);
+    setLiveTick(null);
     getAsset(id).then(setDetail);
     getRecommendations(id).then(setRecs);
     const t = setInterval(() => getAsset(id).then(setDetail), 15000);
 
-    // Open WebSocket for live sensor ticks
     try {
       const url = process.env.REACT_APP_BACKEND_URL.replace(/^http/, "ws") + `/api/ws/sensors/${id}`;
       const ws = new WebSocket(url);
@@ -108,14 +118,22 @@ export default function Equipment() {
         try {
           const m = JSON.parse(ev.data);
           if (m.type === "tick") setLiveTick(m);
-        } catch (e) { /* noop */ }
+        } catch (e) {
+          /* noop */
+        }
       };
       wsRef.current = ws;
-    } catch (e) { console.warn("WS open failed", e); }
+    } catch (e) {
+      console.warn("WS open failed", e);
+    }
 
     return () => {
       clearInterval(t);
-      try { wsRef.current?.close(); } catch { /* noop */ }
+      try {
+        wsRef.current?.close();
+      } catch {
+        /* noop */
+      }
     };
   }, [id]);
 
@@ -127,161 +145,202 @@ export default function Equipment() {
     });
   }, [assets, q, sector]);
 
-  // If a detail asset is requested, show the detail layout below the fleet
+  const totals = useMemo(() => ({
+    total: assets.length,
+    healthy: assets.filter((a) => a.status === "healthy").length,
+    warning: assets.filter((a) => a.status === "warning").length,
+    critical: assets.filter((a) => a.status === "critical").length,
+  }), [assets]);
+
   return (
-    <div className="p-8 max-w-[1600px] mx-auto relative z-10" data-testid="equipment-page">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-black tracking-tight" style={{
-            background: "linear-gradient(90deg, #60A5FA, #A78BFA)",
-            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-          }}>Equipment Fleet</h1>
-          <p className="text-sec text-sm mt-2">{assets.length} assets monitoring active across 6 sectors</p>
+    <div className="relative z-10 mx-auto max-w-[1760px] p-6 lg:p-8" data-testid="equipment-page">
+      <div className="mb-5 rounded-md border border-slate-700/70 bg-[#08111f] p-5">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <div className="label mb-2 flex items-center gap-2 text-cyan">
+              <Wrench size={14} /> Fleet Reliability Registry
+            </div>
+            <h1 className="text-3xl font-black text-pri md:text-4xl">Equipment Command Board</h1>
+            <p className="mt-2 text-sm text-sec">
+              {assets.length} active assets across plant sectors with live health, RUL and risk routing.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {[
+              ["Total", totals.total, "text-info"],
+              ["Stable", totals.healthy, "text-healthy"],
+              ["Watch", totals.warning, "text-warning"],
+              ["Critical", totals.critical, "text-critical"],
+            ].map(([label, value, tone]) => (
+              <div key={label} className="min-w-[110px] rounded border border-slate-700 bg-[#101827] px-3 py-2">
+                <div className="label">{label}</div>
+                <div className={`font-mono text-2xl font-bold ${tone}`}>{value}</div>
+              </div>
+            ))}
+          </div>
         </div>
-        {/* Quick-jump asset selector */}
-        <div className="flex items-center gap-2">
-          <span className="label">JUMP TO ASSET</span>
-          <select
-            data-testid="asset-quick-jump"
-            value={id || ""}
-            onChange={(e) => e.target.value && nav(`/equipment/${e.target.value}`)}
-            className="input !py-2 !w-80 bg-[#0B1224] border-blue-500/40 hover:border-blue-400"
-          >
-            <option value="">— Select asset —</option>
-            {[...assets].sort((a, b) => a.code.localeCompare(b.code)).map((a) => {
-              const ind = a.status === "critical" ? "🔴" : a.status === "warning" ? "🟡" : "🟢";
+      </div>
+
+      <div className="mb-5 grid gap-4 xl:grid-cols-[260px_1fr_360px]">
+        <div className="rounded-md border border-slate-700/70 bg-[#101827] p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <Filter size={14} className="text-cyan" />
+            <span className="label text-cyan">Sector Filter</span>
+          </div>
+          <div className="grid gap-2">
+            {SECTOR_FILTERS.map((f) => {
+              const cnt = f.id === "all" ? assets.length : assets.filter((a) => a.sector === f.id).length;
               return (
-                <option key={a.id} value={a.id}>
-                  {ind} {a.code} · {a.name} ({a.sector || a.category})
-                </option>
+                <button
+                  key={f.id}
+                  onClick={() => setSector(f.id)}
+                  data-testid={`sector-pill-${f.id}`}
+                  className={`flex items-center justify-between rounded border px-3 py-2 text-left text-sm transition ${
+                    sector === f.id
+                      ? "border-cyan-400/60 bg-cyan-400/10 text-pri"
+                      : "border-slate-700 bg-[#08111f] text-sec hover:border-cyan-400/40"
+                  }`}
+                >
+                  <span>{f.label}</span>
+                  <span className="font-mono text-xs text-mut">{cnt}</span>
+                </button>
               );
             })}
-          </select>
-        </div>
-      </div>
-
-      {/* Search + sector pills */}
-      <Card className="mb-5">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[260px]">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-mut" />
-            <input
-              data-testid="fleet-search"
-              className="input pl-9"
-              placeholder="Search fleet (ID, Name, Type)…"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-            />
           </div>
-          <Filter size={14} className="text-mut" />
-          {SECTOR_FILTERS.map((f) => {
-            const cnt = f.id === "all" ? assets.length : assets.filter((a) => a.sector === f.id).length;
-            return (
-              <button
-                key={f.id}
-                onClick={() => setSector(f.id)}
-                data-testid={`sector-pill-${f.id}`}
-                className={`btn !px-3 !py-1.5 !text-xs ${sector === f.id ? "btn-primary" : "btn-secondary"}`}
-              >
-                {f.label} ({cnt})
-              </button>
-            );
-          })}
         </div>
-      </Card>
 
-      {/* Fleet grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        {filtered.map((a) => <FleetCard key={a.id} a={a} />)}
-        {filtered.length === 0 && (
-          <div className="col-span-full text-sec text-sm text-center py-10">No assets match filters.</div>
-        )}
-      </div>
+        <div className="rounded-md border border-slate-700/70 bg-[#101827] p-4">
+          <div className="mb-3 flex flex-col gap-3 md:flex-row md:items-center">
+            <div className="relative flex-1">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-mut" />
+              <input
+                data-testid="fleet-search"
+                className="input pl-9"
+                placeholder="Search asset code, name, category or sector..."
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+              />
+            </div>
+            <select
+              data-testid="asset-quick-jump"
+              value={id || ""}
+              onChange={(e) => e.target.value && nav(`/equipment/${e.target.value}`)}
+              className="input !w-full md:!w-80"
+            >
+              <option value="">Jump to asset</option>
+              {[...assets].sort((a, b) => a.code.localeCompare(b.code)).map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.code} - {a.name} ({a.sector || a.category})
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="mb-2 hidden grid-cols-[1.7fr_1fr_90px_110px_90px] gap-3 px-4 py-2 label md:grid">
+            <span>Asset</span><span>Location</span><span>Health</span><span>Load Bar</span><span className="text-right">State</span>
+          </div>
+          <div className="max-h-[580px] space-y-2 overflow-y-auto pr-1 scrollbar-thin">
+            {filtered.map((a) => <FleetRow key={a.id} asset={a} />)}
+            {filtered.length === 0 && (
+              <div className="py-10 text-center font-mono text-sm text-sec">No assets match filters.</div>
+            )}
+          </div>
+        </div>
 
-      {/* Asset detail (when selected via URL) */}
-      {id && detail && (
-        <div className="space-y-6 mt-2" data-testid="asset-detail">
-          <Card>
-            <div className="flex flex-wrap gap-6 items-start">
-              <HealthGauge value={detail.asset.health} />
-              <div className="flex-1 min-w-[240px]">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="label">{detail.asset.code}</span>
+        <div className="rounded-md border border-slate-700/70 bg-[#101827] p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <SlidersHorizontal size={14} className="text-warning" />
+            <span className="label text-warning">Selected Dossier</span>
+          </div>
+          {detail ? (
+            <div className="space-y-4" data-testid="asset-detail">
+              <div className="rounded border border-slate-700 bg-[#08111f] p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="label">{detail.asset.code}</div>
+                    <h2 className="mt-1 text-xl font-black text-pri">{detail.asset.name}</h2>
+                  </div>
                   <StatusBadge status={detail.asset.status} />
-                  <span className="badge badge-info">{detail.asset.criticality} criticality</span>
                 </div>
-                <h2 className="text-2xl font-bold text-pri">{detail.asset.name}</h2>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 mt-4 text-sm">
-                  <div className="flex items-center gap-2 text-sec"><MapPin size={14} /> <span>{detail.asset.location}</span></div>
-                  <div className="flex items-center gap-2 text-sec"><Factory size={14} /> <span>{detail.asset.manufacturer}</span></div>
-                  <div className="flex items-center gap-2 text-sec"><Cpu size={14} /> <span className="font-mono">{detail.asset.model}</span></div>
-                  <div className="flex items-center gap-2 text-sec"><Calendar size={14} /> <span className="font-mono">Installed {detail.asset.installed}</span></div>
+                <div className="mt-4 flex justify-center">
+                  <HealthGauge value={detail.asset.health} size={130} />
                 </div>
-              </div>
-              <div className="text-right">
-                <div className="label">Remaining Useful Life</div>
-                <div className="font-mono text-4xl font-light text-pri mt-1">
-                  {detail.asset.rul_days}<span className="text-mut text-base">d</span>
+                <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-sec">
+                  <div className="flex items-center gap-2"><MapPin size={13} />{detail.asset.location}</div>
+                  <div className="flex items-center gap-2"><Factory size={13} />{detail.asset.manufacturer}</div>
+                  <div className="flex items-center gap-2"><Cpu size={13} />{detail.asset.model}</div>
+                  <div className="flex items-center gap-2"><Calendar size={13} />{detail.asset.installed}</div>
                 </div>
-                <Link to={`/wizard?asset=${detail.asset.id}`} className="btn btn-primary mt-4" data-testid="ask-wizard-btn">
-                  <Zap size={14} /> Ask AI Wizard
+                <div className="mt-4 rounded border border-slate-700 bg-[#101827] p-3">
+                  <div className="label">Remaining Useful Life</div>
+                  <div className="mt-1 font-mono text-3xl text-pri">
+                    {detail.asset.rul_days}<span className="text-sm text-mut"> days</span>
+                  </div>
+                </div>
+                <Link to={`/wizard?asset=${detail.asset.id}`} className="btn btn-primary mt-4 w-full" data-testid="ask-wizard-btn">
+                  <Zap size={14} /> Ask FORGEOPS Sentinel
                 </Link>
               </div>
             </div>
-          </Card>
+          ) : (
+            <div className="rounded border border-slate-700 bg-[#08111f] p-5 text-sm leading-6 text-sec">
+              Select any asset row to open its telemetry dossier, recommendations, and AI handoff.
+            </div>
+          )}
+        </div>
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {id && detail && (
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {[
               { title: "Vibration", unit: "mm/s", color: "#EF4444", data: detail.sensors.vibration, live: liveTick?.vibration },
-              { title: "Temperature", unit: "°C", color: "#F59E0B", data: detail.sensors.temperature, live: liveTick?.temperature },
+              { title: "Temperature", unit: "C", color: "#F59E0B", data: detail.sensors.temperature, live: liveTick?.temperature },
               { title: "Pressure", unit: "bar", color: "#3B82F6", data: detail.sensors.pressure, live: liveTick?.pressure },
               { title: "Current", unit: "A", color: "#10B981", data: detail.sensors.current, live: liveTick?.current },
             ].map((s) => (
-              <Card key={s.title}
-                    title={
-                      <span className="flex items-center gap-2">
-                        {s.title} · {s.unit}
-                        {liveTick && (
-                          <span className="badge badge-healthy !text-[9px] !py-0.5">
-                            <Radio size={10} /> LIVE
-                          </span>
-                        )}
-                      </span>
-                    }
-                    data-testid={`sensor-${s.title.toLowerCase()}`}>
+              <Card
+                key={s.title}
+                title={
+                  <span className="flex items-center gap-2">
+                    {s.title} - {s.unit}
+                    {liveTick && <span className="badge badge-healthy !py-0.5 !text-[9px]"><Radio size={10} /> LIVE</span>}
+                  </span>
+                }
+                testid={`sensor-${s.title.toLowerCase()}`}
+              >
                 {s.data && s.data.length > 0 ? (
                   <>
                     <SensorChart data={s.data} color={s.color} unit={s.unit} label={s.title} />
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-d">
-                      <div className="label">{s.live != null ? "LIVE TICK" : "LATEST"}</div>
+                    <div className="mt-3 flex items-center justify-between border-t border-d pt-3">
+                      <div className="label">{s.live != null ? "Live Tick" : "Latest"}</div>
                       <div className="font-mono text-pri">
-                        {s.live != null ? s.live : s.data[s.data.length - 1].v} <span className="text-mut text-xs">{s.unit}</span>
+                        {s.live != null ? s.live : s.data[s.data.length - 1].v} <span className="text-xs text-mut">{s.unit}</span>
                       </div>
                     </div>
                   </>
                 ) : (
-                  <div className="text-mut text-sm py-8 text-center font-mono">No data</div>
+                  <div className="py-8 text-center font-mono text-sm text-mut">No data</div>
                 )}
               </Card>
             ))}
           </div>
 
           {recs && (
-            <Card title="RECOMMENDED ACTIONS" testid="recommendations-card">
-              <div className="space-y-3">
+            <Card title={<span className="flex items-center gap-2"><ShieldAlert size={14} className="text-warning" /> SENTINEL RECOMMENDED ACTIONS</span>} testid="recommendations-card">
+              <div className="grid gap-3 md:grid-cols-2">
                 {recs.plan.map((p, i) => (
-                  <div key={i} className="bg-[#131C33] border border-d rounded-lg p-4" data-testid={`rec-${p.priority}`}>
-                    <div className="flex items-center gap-3 mb-1.5">
+                  <div key={i} className="rounded-md border border-slate-700 bg-[#08111f] p-4" data-testid={`rec-${p.priority}`}>
+                    <div className="mb-2 flex items-center gap-3">
                       <span className={`badge ${
                         p.priority === "immediate" ? "badge-critical" :
                         p.priority === "short-term" ? "badge-warning" :
                         p.priority === "long-term" ? "badge-info" : "badge-healthy"
                       }`}>{p.priority}</span>
                       <ArrowRight size={14} className="text-mut" />
-                      <span className="text-pri font-semibold">{p.title}</span>
                     </div>
-                    <div className="text-sec text-sm ml-1">{p.detail}</div>
-                    <div className="label mt-2">ETA · {p.eta_hours}h</div>
+                    <div className="font-semibold text-pri">{p.title}</div>
+                    <div className="mt-2 text-sm text-sec">{p.detail}</div>
+                    <div className="label mt-3">ETA - {p.eta_hours}h</div>
                   </div>
                 ))}
               </div>

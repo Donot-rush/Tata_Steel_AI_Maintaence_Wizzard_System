@@ -1,119 +1,105 @@
 import React from "react";
-import { Card } from "../components/UI";
-import { Award, Cpu, Zap, Sparkles, Mail } from "lucide-react";
+import { Award, Cpu, Mail, ShieldCheck, Sparkles, Zap } from "lucide-react";
 
 export default function Credits() {
+  const features = [
+    ["FORGEOPS Sentinel AI workbench with voice mode", Sparkles],
+    ["Per-asset SOP and manual context", Cpu],
+    ["Live sensor streams and health gauges", Zap],
+    ["Severity and urgency risk radar", Award],
+    ["Predictive RUL and maintenance runway", Sparkles],
+    ["Industrial spares exposure optimizer", Cpu],
+    ["PDF report studio", Zap],
+    ["Role-based operations controls", Award],
+  ];
+
   return (
-    <div className="p-8 max-w-[1200px] mx-auto relative z-10" data-testid="credits-page">
-      <div className="mb-8">
-        <div className="label mb-1">ABOUT THE PROJECT</div>
-        <h1 className="text-4xl font-black tracking-tight" style={{
-          background: "linear-gradient(90deg, #60A5FA, #A78BFA)",
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-        }}>Credits</h1>
+    <div className="relative z-10 mx-auto max-w-[1400px] p-6 lg:p-8" data-testid="credits-page">
+      <div className="mb-5 rounded-md border border-slate-700/70 bg-[#08111f] p-5">
+        <div className="label mb-2 flex items-center gap-2 text-cyan">
+          <ShieldCheck size={14} /> Project Identity
+        </div>
+        <h1 className="text-3xl font-black text-pri md:text-4xl">Credits & Build Notes</h1>
+        <p className="mt-2 text-sm text-sec">Maintenance Wizard for Tata Steel AI Platform, built by Smruti Gujar.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Author */}
-        <div className="lg:col-span-1">
-          <Card className="card-glow-purple">
-            <div className="flex flex-col items-center text-center py-4">
-              <div className="w-28 h-28 rounded-full flex items-center justify-center text-white font-black text-3xl shrink-0 mb-4"
-                   style={{ background: "linear-gradient(135deg, #14B8A6, #0EA5E9, #8B5CF6)" }}>
-                SG
-              </div>
-              <div className="text-2xl font-bold text-pri">Smruti Gujar</div>
-              <div className="font-mono text-xs text-info tracking-[0.18em] mt-1.5 uppercase">AI Engineer</div>
-              <p className="text-sec text-sm mt-3 max-w-xs">
-                Builder of the Maintenance Wizard — Tata Steel AI Platform.
-                Multi-model agentic intelligence, predictive maintenance, and
-                explainable diagnostics for heavy industry.
-              </p>
-              <div className="flex items-center gap-3 mt-5 text-mut">
-                <Mail size={14} /> <span className="font-mono text-[10px] tracking-wider">smruti.gujar · AI Engineer</span>
-              </div>
-            </div>
-          </Card>
-        </div>
+      <div className="grid gap-5 xl:grid-cols-[380px_1fr]">
+        <aside className="rounded-md border border-cyan-400/30 bg-cyan-400/10 p-6 text-center">
+          <div className="mx-auto flex h-28 w-28 items-center justify-center rounded border border-cyan-300/50 bg-[#08111f] text-3xl font-black text-cyan">
+            SG
+          </div>
+          <h2 className="mt-5 text-2xl font-black text-pri">Smruti Gujar</h2>
+          <div className="mt-1 font-mono text-xs uppercase tracking-[0.2em] text-cyan">AI Engineer</div>
+          <p className="mt-4 text-sm leading-6 text-sec">
+            Builder of the Maintenance Wizard, a steel-plant reliability platform for explainable diagnostics,
+            predictive maintenance, spares risk and operational reporting.
+          </p>
+          <div className="mt-5 flex items-center justify-center gap-2 text-mut">
+            <Mail size={14} />
+            <span className="font-mono text-[10px] uppercase tracking-wider">smruti.gujar - AI Engineer</span>
+          </div>
+        </aside>
 
-        <div className="lg:col-span-2 space-y-6">
-          <Card title="THE PROJECT" className="card-glow-blue">
-            <h3 className="text-pri text-xl font-bold mb-2">Maintenance Wizard · Tata Steel AI Platform</h3>
-            <p className="text-sec leading-relaxed">
-              An agentic AI decision-support system for steel-manufacturing maintenance teams.
-              It consolidates sensor telemetry, equipment manuals, SOPs, historical breakdowns,
-              and operational logs to deliver explainable diagnostics, predictive failure
-              warnings, prioritized maintenance actions, and structured reports — all through a
-              natural-language multi-model wizard.
+        <main className="space-y-5">
+          <section className="rounded-md border border-slate-700/70 bg-[#101827] p-5">
+            <div className="label text-cyan">The Project</div>
+            <h2 className="mt-3 text-2xl font-black text-pri">Maintenance Wizard - Tata Steel AI Platform</h2>
+            <p className="mt-3 text-sm leading-7 text-sec">
+              An agentic AI decision-support system for steel-manufacturing maintenance teams. It combines
+              sensor telemetry, equipment manuals, SOPs, historical breakdowns and operational logs to deliver
+              diagnostics, failure warnings, prioritized maintenance actions, inventory risk signals and structured reports.
             </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
-              <div className="bg-[#131C33] border border-d rounded-lg p-3">
-                <div className="font-mono text-2xl text-info">8</div>
-                <div className="label">Pre-seeded assets</div>
-              </div>
-              <div className="bg-[#131C33] border border-d rounded-lg p-3">
-                <div className="font-mono text-2xl text-purple">2</div>
-                <div className="label">LLM models</div>
-              </div>
-              <div className="bg-[#131C33] border border-d rounded-lg p-3">
-                <div className="font-mono text-2xl text-cyan">17</div>
-                <div className="label">Spare parts</div>
-              </div>
-              <div className="bg-[#131C33] border border-d rounded-lg p-3">
-                <div className="font-mono text-2xl text-healthy">9</div>
-                <div className="label">Live modules</div>
-              </div>
-            </div>
-          </Card>
-
-          <Card title="TECH STACK">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="label">FRONTEND</div>
-                <ul className="text-sec text-sm space-y-1.5">
-                  <li>· React 19 + React Router</li>
-                  <li>· TailwindCSS</li>
-                  <li>· Recharts (live sensor + analytics)</li>
-                  <li>· lucide-react icons</li>
-                  <li>· jsPDF (report export)</li>
-                  <li>· react-markdown (AI rendering)</li>
-                </ul>
-              </div>
-              <div className="space-y-2">
-                <div className="label">BACKEND</div>
-                <ul className="text-sec text-sm space-y-1.5">
-                  <li>· FastAPI (Python)</li>
-                  <li>· Motor (async MongoDB)</li>
-                  <li>· Gemini 2.5 Flash (AI generation)</li>
-                  <li>· Groq Whisper (speech-to-text)</li>
-                  <li>· Claude Sonnet 4.5 (reasoning)</li>
-                  <li>· GPT-5.2 (reasoning)</li>
-                  <li>· Whisper-1 + TTS-1 (voice mode)</li>
-                </ul>
-              </div>
-            </div>
-          </Card>
-
-          <Card title="FEATURES" className="card-glow-teal">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="mt-5 grid gap-3 md:grid-cols-4">
               {[
-                ["Multi-model AI Wizard with voice mode", Sparkles],
-                ["Per-asset RAG over manuals + SOPs", Cpu],
-                ["Live sensor streams + health gauges", Zap],
-                ["Risk matrix (severity × urgency)", Award],
-                ["Predictive Remaining Useful Life", Sparkles],
-                ["Dynamic 7-day Gantt scheduler", Cpu],
-                ["Industrial spares risk optimizer", Zap],
-                ["PDF report export + digital logbook", Award],
-              ].map(([label, Icon]) => (
-                <div key={label} className="flex items-center gap-3 bg-[#131C33] border border-d rounded-lg p-3">
-                  <Icon size={16} className="text-info shrink-0" />
-                  <span className="text-pri text-sm">{label}</span>
+                ["30", "Plant assets", "text-info"],
+                ["1", "Sentinel agent", "text-cyan"],
+                ["17", "Spare parts", "text-warning"],
+                ["10", "Live modules", "text-healthy"],
+              ].map(([value, label, tone]) => (
+                <div key={label} className="rounded border border-slate-700 bg-[#08111f] p-3">
+                  <div className={`font-mono text-2xl font-bold ${tone}`}>{value}</div>
+                  <div className="label mt-1">{label}</div>
                 </div>
               ))}
             </div>
-          </Card>
-        </div>
+          </section>
+
+          <section className="rounded-md border border-slate-700/70 bg-[#101827] p-5">
+            <div className="label text-warning">Tech Stack</div>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div className="rounded border border-slate-700 bg-[#08111f] p-4">
+                <div className="label text-cyan">Frontend</div>
+                <ul className="mt-3 space-y-2 text-sm text-sec">
+                  <li>React 19 + React Router</li>
+                  <li>TailwindCSS and custom operations UI</li>
+                  <li>Recharts for telemetry and analytics</li>
+                  <li>jsPDF for report export</li>
+                </ul>
+              </div>
+              <div className="rounded border border-slate-700 bg-[#08111f] p-4">
+                <div className="label text-cyan">Backend</div>
+                <ul className="mt-3 space-y-2 text-sm text-sec">
+                  <li>FastAPI with async MongoDB</li>
+                  <li>FORGEOPS Sentinel routing over Gemini/Groq services</li>
+                  <li>Groq Whisper speech-to-text</li>
+                  <li>WebSocket live sensor streaming</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <section className="rounded-md border border-slate-700/70 bg-[#101827] p-5">
+            <div className="label text-healthy">Feature Coverage</div>
+            <div className="mt-4 grid gap-3 md:grid-cols-2">
+              {features.map(([label, Icon]) => (
+                <div key={label} className="flex items-center gap-3 rounded border border-slate-700 bg-[#08111f] p-3">
+                  <Icon size={16} className="shrink-0 text-cyan" />
+                  <span className="text-sm text-pri">{label}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </main>
       </div>
     </div>
   );
