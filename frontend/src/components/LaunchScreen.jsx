@@ -6,6 +6,7 @@ import {
   DatabaseZap,
   Gauge,
   Network,
+  Server,
   ShieldCheck,
   Zap,
 } from "lucide-react";
@@ -140,7 +141,7 @@ function DashboardMockup() {
                   ))}
                 </div>
                 <div className="mt-4 rounded border border-emerald-400/25 bg-emerald-400/10 px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-emerald-300">
-                  ExtraTrees selected
+                  Sentinel fallback ready
                 </div>
               </div>
             </div>
@@ -197,7 +198,7 @@ export default function LaunchScreen({ mode = "landing", onLaunch }) {
             <a href="#features" className="transition hover:text-pri">Features</a>
             <a href="#diagnostics" className="transition hover:text-pri">Diagnostics</a>
             <a href="#architecture" className="transition hover:text-pri">Architecture</a>
-            <a href="#model" className="transition hover:text-pri">ML Model</a>
+            <a href="#stack" className="transition hover:text-pri">Tech Stack</a>
           </nav>
 
           <button onClick={onLaunch} className="launch-button">
@@ -254,41 +255,51 @@ export default function LaunchScreen({ mode = "landing", onLaunch }) {
         <section id="diagnostics" className="mx-auto max-w-7xl px-5 pb-16">
           <div className="rounded-xl border border-slate-800 bg-[#0b1220]/80 p-6 md:p-8">
             <div className="mb-2 inline-flex items-center gap-2 rounded bg-cyan-400/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-cyan">
-              <BarChart3 size={13} /> Diagnostic Benchmarking
+              <Server size={13} /> Project Architecture
             </div>
-            <h2 className="text-3xl font-black">Why ExtraTrees Ensemble?</h2>
+            <h2 className="text-3xl font-black">Built on the actual Maintenance Wizard stack</h2>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-400">
-              The console favors fast, explainable maintenance scoring for imbalanced plant events,
-              so operators get low-latency decision support during production windows.
+              The console uses a React operations layer, a FastAPI service layer, MongoDB plant data,
+              streaming sensor routes, and AI provider routing through Gemini and Groq with a local
+              Sentinel fallback when cloud models are unavailable.
             </p>
-            <div id="model" className="mt-6 grid gap-4 md:grid-cols-[0.9fr_1.1fr]">
+            <div id="stack" className="mt-6 grid gap-4 md:grid-cols-[0.95fr_1.05fr]">
               <div className="rounded-lg border border-slate-800 bg-[#070d19] p-5">
+                <div className="mb-4 text-sm font-black text-pri">Frontend Stack</div>
                 {[
-                  ["Average Precision", "89%", "bg-emerald-300"],
-                  ["Validation Accuracy", "98.4%", "bg-cyan-300"],
-                  ["ROC-AUC Score", "97%", "bg-amber-300"],
-                ].map(([label, value, color]) => (
-                  <div key={label} className="mb-5">
-                    <div className="mb-2 flex justify-between text-sm font-bold">
-                      <span>{label}</span>
-                      <span className="text-cyan">{value}</span>
+                  [Cpu, "React 19 + React Router", "Launch layer, console routing, and page modules."],
+                  [Gauge, "Tailwind + custom CSS", "Industrial dark UI, cards, launch screen, and dashboard styling."],
+                  [BarChart3, "Recharts + jsPDF", "Analytics visuals and asset report PDF export."],
+                  [Network, "Axios + WebSocket client", "REST API calls and live asset sensor streams."],
+                ].map(([Icon, title, body]) => (
+                  <div key={title} className="mb-4 flex gap-3 rounded-md border border-slate-800 bg-[#0b1220] p-3 last:mb-0">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded border border-cyan-400/30 bg-cyan-400/10">
+                      <Icon size={17} className="text-cyan" />
                     </div>
-                    <div className="h-2 rounded-full bg-slate-900">
-                      <div className={`h-full w-[88%] rounded-full ${color}`} />
+                    <div>
+                      <div className="text-sm font-bold text-pri">{title}</div>
+                      <div className="mt-1 text-xs leading-5 text-slate-500">{body}</div>
                     </div>
                   </div>
                 ))}
               </div>
               <div className="overflow-hidden rounded-lg border border-slate-800 bg-[#070d19]">
+                <div className="grid grid-cols-[0.75fr_1.2fr_1fr] border-b border-slate-800 bg-[#111827] px-4 py-3 font-mono text-[10px] uppercase tracking-wider text-slate-400">
+                  <span>Layer</span>
+                  <span>Technology Used</span>
+                  <span>Role in System</span>
+                </div>
                 {[
-                  ["ExtraTrees", "98.4%", "85%", "Selected"],
-                  ["Random Forest", "97.8%", "82%", "Candidate"],
-                  ["Logistic Regression", "96.5%", "52%", "Failed"],
-                  ["SVM Kernel", "97.2%", "68%", "Failed"],
+                  ["Backend", "FastAPI + Pydantic", "API routes, validation, reports, RBAC"],
+                  ["Database", "MongoDB + Motor", "Assets, alerts, sessions, logs, knowledge"],
+                  ["AI Chat", "Gemini + Groq", "FORGEOPS Sentinel streaming responses"],
+                  ["Fallback", "Local rule engine", "Plant-data response during provider outages"],
+                  ["Realtime", "FastAPI WebSockets", "Live sensor ticks for equipment pages"],
+                  ["Voice", "Groq STT + TTS hook", "Voice input and speech playback flow"],
                 ].map((row) => (
-                  <div key={row[0]} className="grid grid-cols-4 border-b border-slate-900 px-4 py-4 text-sm last:border-b-0">
+                  <div key={row[0]} className="grid grid-cols-[0.75fr_1.2fr_1fr] border-b border-slate-900 px-4 py-4 text-sm last:border-b-0">
                     {row.map((cell, idx) => (
-                      <span key={idx} className={idx === 3 && cell === "Selected" ? "text-emerald-300" : "text-slate-300"}>
+                      <span key={idx} className={idx === 1 ? "font-semibold text-cyan" : "text-slate-300"}>
                         {cell}
                       </span>
                     ))}
@@ -305,7 +316,7 @@ export default function LaunchScreen({ mode = "landing", onLaunch }) {
             <h2 className="mt-4 text-3xl font-black">Ready to simulate plant health?</h2>
             <p className="mt-3 text-sm leading-6 text-slate-400">
               Launch the console to view the dashboard, AI chat, equipment fleet, scheduler,
-              spares optimizer, and report generator.
+              spares optimizer, knowledge center, reports, and live sensor streams.
             </p>
             <button onClick={onLaunch} className="launch-button launch-button-primary mt-6">
               Launch Console <ArrowRight size={15} />
